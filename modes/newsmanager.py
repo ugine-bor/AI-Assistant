@@ -1,4 +1,5 @@
 import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 from news_include.rubert import RubertClassifier
 from news_include.parser import Parser
@@ -44,24 +45,38 @@ async def process_message(message, bot):  # message.text = "1, 3, Бухгалт
 
     # Classes
     rubert = RubertClassifier(os.getenv("RUBERT"))
-    parser = Parser()
+    parser = Parser(message.from_user.id, bot)
 
     # Variables
-    try:
-        msg = message.text.split(', ')
-        site, days, classes = msg[0], int(msg[1]), msg[2:]
-    except IndexError:
-        await bot.send_message(message.from_user.id,
-                           "Неверный формат запроса. Пример: 1, 3, Бухгалтерия, Обучающие курсы, Обновление")
-        return
-
-
     sites = {
         "1": os.getenv('ODINC'),
         "2": os.getenv('UCHET'),
         "3": os.getenv('PRO1C'),
         "4": os.getenv('MYBUH'),
         "5": os.getenv('GOS24')}
+    try:
+        msg = message.text.split(',')
+        if not msg[0].strip().isdigit():
+            site, days, classes = '1', 3, msg[:]
+        elif not msg[1].strip().isdigit():
+            sites[msg[0].strip()]
+            site, days, classes = msg[0].strip(), 3, msg[1:]
+        else:
+            sites[msg[0].strip()]
+            days = int(msg[1].strip())
+
+            if days < 1 or days > 30:
+                raise ValueError
+            site, classes = msg[0].strip(), msg[2:]
+
+        classes = list(map(lambda x: x.strip(), classes))
+        if len(classes) == 1:
+            classes.append('none')
+
+    except (KeyError, ValueError, IndexError):
+        await bot.send_message(message.from_user.id, "Неверный формат запроса. Пример: 1, 3, Бухгалтерия, Обучающие курсы, Обновление")
+        return
+
 
     # Get themes from file
     # with open(os.getenv('THEMES'), 'r', encoding='utf-8') as f:
@@ -69,8 +84,10 @@ async def process_message(message, bot):  # message.text = "1, 3, Бухгалт
     #    choice = sites[message.text]
 
     # Parse news
-    articles = parser.get_news(sites[site], days)
-    print(articles)
+    articles = await parser.get_news(sites[site], days)
+    if not articles:
+        await bot.send_message(message.from_user.id, "Не удалось получить новости")
+        return
     texts = [item[1] for item in articles.values()]
 
     await bot.send_message(message.from_user.id,
@@ -82,9 +99,9 @@ async def process_message(message, bot):  # message.text = "1, 3, Бухгалт
         probes.append(rubert.predict(text, classes, normalize=False))
 
     [articles[key].append(probes[i]) for i, key in enumerate(articles.keys())]
+    print(articles)
 
     articles = filter_by_theme(articles, classes)
-    print(articles)
     news = []
 
     await bot.send_message(message.from_user.id,
