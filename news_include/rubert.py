@@ -10,8 +10,13 @@ class RubertClassifier:
         if torch.cuda.is_available():
             self.model.cuda()
 
+    @staticmethod
+    def text_preprocess(text):
+        text = f"Это статья на тему '{text.strip()}'"
+        return text
+
     def predict(self, text, label_texts, label='entailment', normalize=True):
-        tokens = self.tokenizer([text] * len(label_texts), label_texts, truncation=True, return_tensors='pt', padding=True)
+        tokens = self.tokenizer([self.text_preprocess(text)] * len(label_texts), label_texts, truncation=True, return_tensors='pt', padding=True)
         with torch.inference_mode():
             result = torch.softmax(self.model(**tokens.to(self.model.device)).logits, -1)
         proba = result[:, self.model.config.label2id[label]].cpu().numpy()

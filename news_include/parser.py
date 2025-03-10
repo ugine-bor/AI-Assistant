@@ -50,7 +50,9 @@ class Parser:
             print(f"BeautifulSoup error: {e}")
             return None
 
-    async def get_news(self, url, days=int(os.getenv('LAST_DAYS'))):
+    async def get_news(self, url, days=(
+            'int',
+            int(os.getenv('LAST_DAYS')))):  # ('int', 3) ('one day', 21.04.2022) ('range', 21.04.2022, 21.05.2022)
         handlers = {
             os.getenv('ODINC'): self.odinc,
             os.getenv('UCHET'): self.uchet,
@@ -67,11 +69,11 @@ class Parser:
             print("Failed to parse page")
             return None
 
-        return await handlers[url](soup, days)
+        rng = self.parse_days(days)
 
-    async def odinc(self, soup, days):
-        curtime = datetime.now()
-        until = (curtime - timedelta(days=days)).date()
+        return await handlers[url](soup, rng)
+
+    async def odinc(self, soup, rng):
         articles = {}
 
         tbody = soup.select_one(os.getenv('ODINC_LIST'))
@@ -80,8 +82,7 @@ class Parser:
             time_el = item.find('td', class_='news-date-time').text.strip()
             link = item.find('a')
             article_date = datetime.strptime(time_el, '%d.%m.%Y').date()
-
-            if article_date >= until:
+            if rng[0] <= article_date <= rng[1]:
                 base_url = '/'.join(os.getenv('ODINC').split('/')[:-2])
                 ur = f"{base_url}{link.get('href')}"
                 page = await self.get_soup(ur)
@@ -92,9 +93,7 @@ class Parser:
 
         return articles
 
-    async def uchet(self, soup, days):
-        curtime = datetime.now()
-        until = (curtime - timedelta(days=days)).date()
+    async def uchet(self, soup, rng):
         articles = {}
 
         tbody = soup.select_one(os.getenv('UCHET_LIST'))
@@ -104,7 +103,7 @@ class Parser:
             link = item.find('a')
             article_date = datetime.strptime(time_el, '%d.%m.%Y').date()
 
-            if article_date >= until:
+            if rng[0] <= article_date <= rng[1]:
                 base_url = '/'.join(os.getenv('UCHET').split('/')[:-2])
                 ur = f"{base_url}{link.get('href')}"
                 page = await self.get_soup(ur)
@@ -115,9 +114,7 @@ class Parser:
 
         return articles
 
-    async def mybuh(self, soup, days):
-        curtime = datetime.now()
-        until = (curtime - timedelta(days=days)).date()
+    async def mybuh(self, soup, rng):
         articles = {}
 
         tbody = soup.select_one("ul.popular-news__list.scroll")
@@ -131,7 +128,7 @@ class Parser:
             link = item.find('a')
             article_date = datetime.strptime(time_el, '%d.%m.%Y').date()
 
-            if article_date >= until:
+            if rng[0] <= article_date <= rng[1]:
                 base_url = '/'.join(os.getenv('MYBUH').split('/')[:-2])
                 ur = f"{base_url}{link.get('href')}"
                 page = await self.get_soup(ur)
@@ -142,9 +139,7 @@ class Parser:
 
         return articles
 
-    async def pro1c(self, soup, days):
-        curtime = datetime.now()
-        until = (curtime - timedelta(days=days)).date()
+    async def pro1c(self, soup, rng):
         articles = {}
 
         tbody = soup.select_one(os.getenv('PRO1C_LIST'))
@@ -158,7 +153,7 @@ class Parser:
             link = item.find('a')
             article_date = datetime.strptime(time_el, '%d.%m.%Y').date()
 
-            if article_date >= until:
+            if rng[0] <= article_date <= rng[1]:
                 base_url = '/'.join(os.getenv('PRO1C').split('/')[:-2])
                 ur = f"{base_url}{link.get('href')}"
                 page = await self.get_soup(ur)
@@ -169,9 +164,7 @@ class Parser:
 
         return articles
 
-    async def gos24(self, soup, days):
-        curtime = datetime.now()
-        until = (curtime - timedelta(days=days)).date()
+    async def gos24(self, soup, rng):
         articles = {}
 
         tbody = soup.select_one(os.getenv('GOS24_LIST'))
@@ -183,7 +176,7 @@ class Parser:
             formatted_date = self.dateformat(time_el)
             article_date = datetime.strptime(formatted_date, '%d.%m.%Y').date()
 
-            if article_date >= until:
+            if rng[0] <= article_date <= rng[1]:
                 ur = f"{os.getenv('GOS24')[:-1]}{link.get('href')}"
                 page = await self.get_soup(ur)
 
@@ -208,3 +201,27 @@ class Parser:
 
         parts = date_str.strip().split()
         return f"{parts[0]}.{months[parts[1]].lower()}.{parts[2]}"
+
+    @staticmethod
+    def parse_days(days):
+        now = datetime.now().date()
+
+        mode = days[0]
+        if mode == 'int':
+            delta = days[1]
+            start_date = now - timedelta(days=delta)
+            return start_date, now
+        elif mode == 'one day':
+            date_str = days[1]
+            date_obj = datetime.strptime(date_str, '%d.%m.%Y').date()
+            return date_obj, date_obj
+        elif mode == 'range':
+            start_str = days[1]
+            end_str = days[2]
+            start_date = datetime.strptime(start_str, '%d.%m.%Y').date()
+            end_date = datetime.strptime(end_str, '%d.%m.%Y').date()
+            return start_date, end_date
+        else:
+            delta = int(os.getenv('LAST_DAYS', 3))
+            start_date = now - timedelta(days=delta)
+            return start_date, now
