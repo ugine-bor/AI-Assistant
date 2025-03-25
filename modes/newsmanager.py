@@ -33,7 +33,7 @@ async def send_long_message(bot, user_id, text):
     MAX_LENGTH = 4000
 
     if len(text) <= MAX_LENGTH:
-        await bot.send_message(user_id, text)
+        await bot.send_message(user_id, text, parse_mode='Markdown')
         return
 
     message_parts = []
@@ -42,7 +42,7 @@ async def send_long_message(bot, user_id, text):
 
     for i, part in enumerate(message_parts):
         part_indicator = f"Часть {i + 1}/{len(message_parts)}: " if len(message_parts) > 1 else ""
-        await bot.send_message(user_id, f"{part_indicator}{part}")
+        await bot.send_message(user_id, f"{part_indicator}{part}", parse_mode='MarkdownV2')
 
 
 async def process_message(message, bot):
@@ -54,14 +54,16 @@ async def process_message(message, bot):
         vidid = vid.getytid(url)
         if vidid:
             subtitle = vid.parse(vidid)
-            result = summarizer(subtitle, classes)
+            summ = summarizer(subtitle, classes)
+            result = vid.postprocess(summ, url)
             await send_long_message(bot, message.from_user.id, result)
             return
     else:
         vidid = vid.getytid(message.text)
         if vidid:
             subtitle = vid.parse(vidid)
-            result = summarizer(subtitle, 'any')
+            summ = summarizer(subtitle, 'any')
+            result = vid.postprocess(summ, message.text.strip())
             await send_long_message(bot, message.from_user.id, result)
             return
 

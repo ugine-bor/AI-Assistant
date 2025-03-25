@@ -51,7 +51,8 @@ Themes:
 Rules:
 1. Find news about only given themes in the transcript and list them.
 2. Sign all news separately with the corresponding themes.
-3. Respond in Russian.
+3. Always add timecode to each news item in format [t=seconds].
+4. Respond in Russian.
 
 Answer:"""
 
@@ -69,5 +70,4 @@ Answer:"""
 
     chain = prompt | llm
     response = chain.invoke({"transcript": text, "themes": themes})
-    print(response)
     return response.content
