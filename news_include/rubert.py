@@ -13,7 +13,7 @@ class RubertClassifier:
     @staticmethod
     def text_preprocess(text):
         text = f"Это статья на тему '{text.strip()}'"
-        return text
+        return text 
 
     def predict(self, text, label_texts, label='entailment', normalize=True):
         tokens = self.tokenizer([self.text_preprocess(text)] * len(label_texts), label_texts, truncation=True, return_tensors='pt', padding=True)
@@ -22,4 +22,4 @@ class RubertClassifier:
         proba = result[:, self.model.config.label2id[label]].cpu().numpy()
         if normalize:
             proba /= sum(proba)
-        return proba
+        return proba  

@@ -37,3 +37,37 @@ Answer:"""
     chain = prompt | llm
     response = chain.invoke({"article": text})
     return response.content
+
+
+def summarizer(text, themes='any'):
+    template = """Summarize the video subtitle transcript given to you.
+
+Transcript:
+{transcript}
+
+Themes:
+{themes}
+
+Rules:
+1. Find news about only given themes in the transcript and list them.
+2. Sign all news separately with the corresponding themes.
+3. Respond in Russian.
+
+Answer:"""
+
+    prompt = PromptTemplate(
+        template=template,
+        input_variables=["transcript", "themes"]
+    )
+
+    llm = ChatOpenAI(
+        model_name="gpt-4o-mini",
+        temperature=0.5,
+        max_tokens=2000,
+        openai_api_key=OPENAI_API_KEY
+    )
+
+    chain = prompt | llm
+    response = chain.invoke({"transcript": text, "themes": themes})
+    print(response)
+    return response.content

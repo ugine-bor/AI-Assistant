@@ -4,12 +4,15 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 from news_include.rubert import RubertClassifier
 from news_include.parser import Parser
-from news_include.chatgpt import shortener
+from news_include.chatgpt import shortener, summarizer
+from news_include.videoparser import VideoParser
+
 from re import compile, match
 
 from dotenv import load_dotenv
 
 load_dotenv()
+vid = VideoParser()
 
 
 def filter_by_theme(articles, classes):
@@ -44,6 +47,23 @@ async def send_long_message(bot, user_id, text):
 
 async def process_message(message, bot):
     await bot.send_message(message.from_user.id, "Ищу новости...")
+
+    if ',' in message.text:
+        url = message.text.split(',')[0].strip()
+        classes = list(map(lambda x: x.strip(), message.text.split(',')[1:]))
+        vidid = vid.getytid(url)
+        if vidid:
+            subtitle = vid.parse(vidid)
+            result = summarizer(subtitle, classes)
+            await send_long_message(bot, message.from_user.id, result)
+            return
+    else:
+        vidid = vid.getytid(message.text)
+        if vidid:
+            subtitle = vid.parse(vidid)
+            result = summarizer(subtitle, 'any')
+            await send_long_message(bot, message.from_user.id, result)
+            return
 
     # Classes
     rubert = RubertClassifier(os.getenv("RUBERT"))

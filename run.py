@@ -4,9 +4,10 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
 from dotenv import load_dotenv
 
-from modes import assistant, faq, newsmanager
+from modes import assistant, faq, newsmanager, doctor
 
 load_dotenv()
 
@@ -48,13 +49,25 @@ async def switch_to_mode3(message: types.Message):
 
 Пример запроса: 1, 30, Бухгалтерия, Обучающие курсы, Обновление
 
-Результат: краткая сводка новостей по темам 'Бухгалтерия', 'Обучающие курсы' или 'Обновление' за последние 30 дней с сайта `{os.getenv('ODINC')[8:-6]}`''', disable_web_page_preview=True)
+Результат: краткая сводка новостей по темам 'Бухгалтерия', 'Обучающие курсы' или 'Обновление' за последние 30 дней с сайта `{os.getenv('ODINC')[8:-6]}`
 
+
+Для поиска новостей в видео введите ссылку и темы также через запятую.
+Пример запроса: https://www.youtube.com/watch?v=xxxxxx, Бухгалтерия, Обучающие курсы, Обновление''',
+                         disable_web_page_preview=True)
+
+
+@dp.message(Command("mode4"))
+async def switch_to_mode4(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    user_modes[user_id] = 4
+    await message.answer("✅ Активирован режим AI-терапевта")
+    await doctor.start_interview(message.chat.id, bot, state)
 
 
 # Общий обработчик сообщений, делегирующий их в соответствующий режим
 @dp.message()
-async def handle_message(message: types.Message):
+async def handle_message(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     print(f"Получено сообщение от {user_id}: {message.text}")
     mode = user_modes.get(user_id, 1)  # По умолчанию режим FAQ (1)
@@ -65,6 +78,8 @@ async def handle_message(message: types.Message):
         await assistant.process_message(message, bot)
     elif mode == 3:
         await newsmanager.process_message(message, bot)
+    elif mode == 4:
+        await doctor.process_message(message, state)
 
 
 async def main():
