@@ -1,0 +1,6 @@
+allnews
+news
+blog
+articles
+article
+novosti
