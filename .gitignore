@@ -1,4 +1,4 @@
 .env
 .idea
-news_include/probe.py
-yt_netscape.txt
+probe.py
+yt_netscape.txtls

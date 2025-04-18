@@ -6,9 +6,9 @@ from openai import AsyncOpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-ASSISTANT_ID = os.getenv("OPENAI_ASSIST_TOKEN")
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN").strip()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY").strip()
+ASSISTANT_ID = os.getenv("OPENAI_ASSIST_TOKEN").strip()
 
 if not all([BOT_TOKEN, OPENAI_API_KEY, ASSISTANT_ID]):
     print("⚠️ Missing required environment variables!")

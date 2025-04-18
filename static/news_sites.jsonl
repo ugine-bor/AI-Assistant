@@ -1,0 +1,6 @@
+{id: 1, url: "https://1c.kz/news/", list: "body > div:nth-child(3) > div > div:nth-of-type(2) > main > div > table > tbody"}
+{id: 2, url: "https://pro1c.kz/news/", list: "body > div:nth-of-type(1) > div > div > div:nth-of-type(2) > div > div:nth-of-type(2) > div > ul"}
+{id: 3, url: "https://mybuh.kz/news/", list: "html > body > div:nth-of-type(5) > section:first-of-type > article:nth-of-type(3) > div:nth-of-type(5) > ul"}
+{id: 4, url: "https://uchet.kz/news/", list: "body > div:nth-of-type(1) > div > div > main > div > div > section > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2)"}
+{id: 5, url: "https://gos24.kz/", list: "body > div:first-of-type > div > div > div:nth-of-type(2) > div > div:nth-of-type(2) > div > div > section"}
+{id: 6, url: "https://kgd.gov.kz/ru/content/fno-na-2025-god-1/", list: "html > body > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(1) > section > div:nth-of-type(2) > div > div > div > div:nth-of-type(2) > div > div > div > table > tbody"}
