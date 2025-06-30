@@ -1,4 +1,9 @@
 .env
 .idea
 probe.py
+audio-to-text.py
 yt_netscape.txtls
+.venv/
+venv/
+yt_netscape.txt
+/static/knowledge_files/

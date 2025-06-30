@@ -4,7 +4,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 from news_include.rubert import RubertClassifier
 from news_include.parser import Parser
-from news_include.chatgpt import shortener, summarizer
+from news_include.chatgpt import shortener_deepseek as shortener, summarizer_deepseek as summarizer
 from news_include.videoparser import VideoParser
 
 from re import compile, match

@@ -12,7 +12,7 @@ from urllib.parse import urljoin, urlparse
 from lxml import etree
 import io
 
-from news_include.chatgpt import link_finder
+from news_include.chatgpt import link_finder_deepseek as link_finder
 
 from newspaper import Article
 

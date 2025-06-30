@@ -7,7 +7,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from dotenv import load_dotenv
 
-from modes import assistant, faq, newsmanager, doctor
+from modes import assistant, faq, newsmanager, doctor, assistant_2, audio_to_text
 
 load_dotenv()
 
@@ -72,6 +72,19 @@ async def switch_to_mode4(message: types.Message, state: FSMContext):
     await doctor.start_interview(message.chat.id, bot, state)
 
 
+@dp.message(Command("mode5"))
+async def switch_to_mode5(message: types.Message):
+    user_id = message.from_user.id
+    user_modes[user_id] = 5
+    await message.answer("✅ Активирован режим AI-ассистента от GOOGLE")
+
+
+@dp.message(Command("mode6"))
+async def switch_to_mode6(message: types.Message):
+    user_id = message.from_user.id
+    user_modes[user_id] = 6
+    await message.answer("✅ Активирован режим аудио-транскрипции (Whisper)")
+
 # Общий обработчик сообщений, делегирующий их в соответствующий режим
 @dp.message()
 async def handle_message(message: types.Message, state: FSMContext):
@@ -87,6 +100,10 @@ async def handle_message(message: types.Message, state: FSMContext):
         await newsmanager.process_message(message, bot)
     elif mode == 4:
         await doctor.process_message(message, state)
+    elif mode == 5:
+        await assistant_2.process_message(message, bot)
+    elif mode == 6:
+        await audio_to_text.process_message(message, bot)
 
 
 async def main():
