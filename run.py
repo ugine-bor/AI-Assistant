@@ -31,6 +31,7 @@ async def switch_to_mode1(message: types.Message):
 @dp.message(Command("mode2"))
 async def switch_to_mode2(message: types.Message):
     user_id = message.from_user.id
+    await assistant.reset_thread_for_user(user_id)
     user_modes[user_id] = 2
     await message.answer("✅ Активирован режим AI-ассистента")
 

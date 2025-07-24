@@ -16,42 +16,17 @@ if not all([BOT_TOKEN, OPENAI_API_KEY, ASSISTANT_ID]):
 
 client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 USER_THREADS = {}
-DEFAULT_FILE = "knowledge.txt"
 
 
-async def update_assistant_files(file_ids):
-    try:
-        vector_store = await client.beta.vector_stores.create(
-            name="Knowledge Base",
-            file_ids=file_ids
-        )
-
-        await client.beta.assistants.update(
-            ASSISTANT_ID,
-            tools=[{"type": "file_search"}],
-            tool_resources={
-                "file_search": {
-                    "vector_store_ids": [vector_store.id]
-                }
-            }
-        )
-        print("✅ Assistant files updated")
-    except Exception as e:
-        print(f"❌ Error updating assistant: {e}")
-
-
-async def upload_file(filepath):
-    try:
-        with open(filepath, "rb") as f:
-            file = await client.files.create(file=f, purpose="assistants")
-            return file.id
-    except Exception as e:
-        print(f"❌ File upload error: {e}")
-        return None
-
+async def reset_thread_for_user(user_id: int):
+    if user_id in USER_THREADS:
+        del USER_THREADS[user_id]
+        print(f"🗑️ Thread for user {user_id} has been reset.")
 
 async def initialize_assistant():
     try:
+        global USER_THREADS
+        USER_THREADS = {}
         assistant = await client.beta.assistants.retrieve(ASSISTANT_ID)
         print(f"🧠 Assistant ready: {assistant.name} (Model: {assistant.model})")
 
@@ -74,26 +49,9 @@ async def get_thread(user_id):
 
 
 async def process_message(message: Message, bot):
-    if message.text.startswith("/update"):
-        file_id = await upload_file(DEFAULT_FILE)
-        if file_id:
-            await update_assistant_files([file_id])
-            await message.answer("✅ Knowledge base updated!")
-        return
+    if message.text.startswith("reset"):
+        await reset_thread_for_user(message.from_user.id)
 
-    elif message.content_type == ContentType.DOCUMENT:
-        doc = message.document
-        file_path = DEFAULT_FILE
-        file = await bot.get_file(doc.file_id)
-        await bot.download_file(file.file_path, destination=file_path)
-
-        file_id = await upload_file(file_path)
-        if file_id:
-            await update_assistant_files([file_id])
-            await message.answer("✅ File uploaded and applied!")
-        return
-
-    # Process text queries
     thread_id = await get_thread(message.from_user.id)
 
     try:
@@ -126,9 +84,8 @@ async def process_message(message: Message, bot):
         )
 
         response = messages.data[0].content[0].text.value
-        await message.answer('mode2:\n' + response)
+        await message.answer('mode2:\n' + response, parse_mode=None)
 
     except Exception as e:
         print(f"❌ Request error: {e}")
         await message.answer("🚫 Failed to retrieve response")
-
