@@ -46,8 +46,10 @@ async def cmd_reset(message: Message):
     reset_user_context(message.from_user.id)
     await message.answer("🔄 Контекст диалога сброшен. Можем начинать заново!")
 
-@dp.message(F.text & ~F.text.startswith("/"))
+@dp.message(F.text)
 async def process_message(message: Message, bot: Bot):
+    if message.text.startswith("/reset"):
+        reset_user_context(message.from_user.id)
     user_id = message.from_user.id
     user_input = message.text
     if VECTOR_STORE_ID is None:
