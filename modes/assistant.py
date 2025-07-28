@@ -50,7 +50,7 @@ async def cmd_reset(message: Message):
 async def process_message(message: Message, bot: Bot):
     if message.text.startswith("/reset"):
         reset_user_context(message.from_user.id)
-        await message.answer("🔄 Контекст диалога сброшен")
+        await message.answer("🔄 Контекст диалога сброшен.")
         return
     user_id = message.from_user.id
     user_input = message.text
