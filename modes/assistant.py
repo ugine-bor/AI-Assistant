@@ -2,8 +2,8 @@ import asyncio
 import os
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, BotCommand
-from aiogram.filters import Message, Command
+from aiogram.types import Message
+from aiogram.filters import Command
 from openai import AsyncOpenAI
 
 load_dotenv()
