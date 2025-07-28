@@ -46,7 +46,7 @@ async def cmd_reset(message: Message):
     reset_user_context(message.from_user.id)
     await message.answer("🔄 Контекст диалога сброшен. Можем начинать заново!")
 
-@dp.message(F.text)
+@dp.message(F.text & ~F.text.startswith("/"))
 async def process_message(message: Message, bot: Bot):
     user_id = message.from_user.id
     user_input = message.text
