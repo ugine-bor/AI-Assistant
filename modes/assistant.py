@@ -13,7 +13,6 @@ MODEL_NAME = "gpt-4o-mini"
 
 with open("static/prompt1.txt", 'r', encoding="utf-8") as fil:
     system_prompt = fil.read()
-print(system_prompt)
 SYSTEM_PROMPT = system_prompt
 
 client = AsyncOpenAI(api_key=OPENAI_API_KEY)
