@@ -2,7 +2,7 @@ import asyncio
 import os
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message
+from aiogram.types import Message, BotCommand
 from openai import AsyncOpenAI
 
 load_dotenv()
@@ -36,6 +36,14 @@ async def initialize_assistant():
                     vector_store_id=VECTOR_STORE_ID,
                     files=[f]
                 )
+
+def reset_user_context(user_id: int) -> None:
+    USER_LAST_RESPONSE_ID.pop(user_id, None)
+
+@dp.message(commands=['reset'])
+async def cmd_reset(message: Message):
+    reset_user_context(message.from_user.id)
+    await message.answer("🔄 Контекст диалога сброшен. Можем начинать заново!")
 
 @dp.message(F.text)
 async def process_message(message: Message, bot: Bot):
