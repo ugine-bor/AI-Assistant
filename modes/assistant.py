@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, BotCommand
+from aiogram.filters import Message, Command
 from openai import AsyncOpenAI
 
 load_dotenv()
@@ -40,7 +41,7 @@ async def initialize_assistant():
 def reset_user_context(user_id: int) -> None:
     USER_LAST_RESPONSE_ID.pop(user_id, None)
 
-@dp.message(commands=['reset'])
+@dp.message(Command("reset"))
 async def cmd_reset(message: Message):
     reset_user_context(message.from_user.id)
     await message.answer("🔄 Контекст диалога сброшен. Можем начинать заново!")
