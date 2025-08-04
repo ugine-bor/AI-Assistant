@@ -21,22 +21,10 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 USER_LAST_RESPONSE_ID = {}
-VECTOR_STORE_ID = None
+VECTOR_STORE_ID = "vs_6890874c41c48191a7b163aec4bcdb18"
 
 async def initialize_assistant():
-    global VECTOR_STORE_ID
-    if VECTOR_STORE_ID is not None:
-        return
-    vector_store = await client.vector_stores.create(name="Support Documents")
-    VECTOR_STORE_ID = vector_store.id
-    for file_name in os.listdir(DIR_FILES):
-        file_path = os.path.join(DIR_FILES, file_name)
-        if os.path.isfile(file_path):
-            with open(file_path, "rb") as f:
-                await client.vector_stores.file_batches.upload_and_poll(
-                    vector_store_id=VECTOR_STORE_ID,
-                    files=[f]
-                )
+    print('started')
 
 def reset_user_context(user_id: int) -> None:
     USER_LAST_RESPONSE_ID.pop(user_id, None)
