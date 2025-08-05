@@ -12,7 +12,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 DIR_FILES = "static/files"
 MODEL_NAME = "gpt-4o-mini"
 
-with open("static/prompt1.txt", 'r', encoding="utf-8") as fil:
+with open("static/prompt_shagi.txt", 'r', encoding="utf-8") as fil:
     system_prompt = fil.read()
 SYSTEM_PROMPT = system_prompt
 
